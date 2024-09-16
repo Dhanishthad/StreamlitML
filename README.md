@@ -4,7 +4,8 @@ This Streamlit application uses a machine learning model to predict the species 
 
 ## Demo App
 
-[![Streamlit App](https://dhanishtha.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dhanishtha.streamlit.app/)
+
 
 ## GitHub Codespaces
 
