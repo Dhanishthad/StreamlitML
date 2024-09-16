@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 
 st.title('🤖 Machine Learning App')
 
@@ -11,12 +12,12 @@ with st.expander('Data'):
   df
  
   st.write('**X**')
-  X =df.drop('species',axis=1)
-  X
+  X_raw=df.drop('species',axis=1)
+  X_raw
 
   st.write('**Y**')
-  Y =df.species
-  Y
+  y_raw =df.species
+  y_raw
 
 with st.expander('Data Visualization'):
   st.scatter_chart(data=df, x='bill_length_mm', y='body_mass_g',color='species')
@@ -47,9 +48,37 @@ with st.expander('Input features'):
   st.write('**Combined penguins data**')
   input_penguins
 
-# encode
+#data preparation
+# encode x
 encode = ['island','sex']
 df_penguins = pd.get_dummies(input_penguins, prefix=encode)
-df_penguins
+input_row= df_penguins[:1]
+
+#encode y
+target_mapper = {'Adelie':0,
+                 'Chinstrap':1,
+                 'Gentoo':2}
+def target_encode(val):
+  return target_mapper(val)
+
+y = y_raw.apply(target_encode)
+y
+y_raw
+
+with st.expander('Data preparation'):  
+  st.write('**Encoded X (input penguin)**')
+  input_row
+  st.write('**Encoded y**')
+  y
+
+#model training and inference
+##Train Ml model
+clf = RandomForestClassifier()
+clf.fit(X_raw,y)
+#apply model to make predictions
+prediction=clf.predict(input_row)
+prediction_probability= clf.predict_proba(input_row)
+
+
 
   
