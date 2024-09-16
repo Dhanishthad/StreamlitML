@@ -1,6 +1,6 @@
 #  🤖 Machine Learning App
 
-This Streamlit application uses a machine learning model to predict the species of a penguin based on various input features. The model is trained using a dataset containing penguin measurements. The app provides a user interface for data visualization, input feature entry, and prediction results.
+This Streamlit application uses a machine learning model to predict the breed of a dog based on various input features. The model is trained using a dataset containing dog measurements. The app provides a user interface for data visualization, input feature entry, and prediction results.
 
 ## Demo App
 
