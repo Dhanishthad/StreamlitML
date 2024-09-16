@@ -31,7 +31,7 @@ with st.sidebar:
   weight_kg = st.slider('Weight (kg)', 13.1, 21.5, 17.2)
   tail_length_cm = st.slider('Tail length (cm)', 172.0, 231.0, 201.0)
   body_mass_g = st.slider('Body mass (g)', 2700.0, 6300.0, 4207.0)
-  = st.selectbox('Sex', ('male', 'female'))
+  sex= st.selectbox('Sex', ('male', 'female'))
   
   # Create a DataFrame for the input features
   data = {'country': country,
