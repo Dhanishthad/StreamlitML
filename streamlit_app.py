@@ -9,66 +9,68 @@ st.info('This is app builds a machine learning model!')
 
 with st.expander('Data'):
   st.write('**Raw data**')
-  df = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/master/penguins_cleaned.csv')
+  df = pd.read_csv('https://raw.githubusercontent.com/Dhanishthad/StreamlitML/master/dogs_cleaned.csv')
   df
 
   st.write('**X**')
-  X_raw = df.drop('species', axis=1)
+  X_raw = df.drop('breed', axis=1)
   X_raw
 
   st.write('**y**')
-  y_raw = df.species
+  y_raw = df.breed
   y_raw
 
 with st.expander('Data visualization'):
-  st.scatter_chart(data=df, x='bill_length_mm', y='body_mass_g', color='species')
+  st.scatter_chart(data=df, x='height_cm', y='body_mass_g', color='breed')
 
 # Input features
 with st.sidebar:
   st.header('Input features')
-  island = st.selectbox('Island', ('Biscoe', 'Dream', 'Torgersen'))
-  bill_length_mm = st.slider('Bill length (mm)', 32.1, 59.6, 43.9)
-  bill_depth_mm = st.slider('Bill depth (mm)', 13.1, 21.5, 17.2)
-  flipper_length_mm = st.slider('Flipper length (mm)', 172.0, 231.0, 201.0)
+  country = st.selectbox('Country', ('UK', 'Canada', 'Germany'))
+  height_cm = st.slider('Height (cm)', 32.1, 59.6, 43.9)
+  weight_kg = st.slider('Weight (kg)', 13.1, 21.5, 17.2)
+  tail_length_cm = st.slider('Tail length (cm)', 172.0, 231.0, 201.0)
   body_mass_g = st.slider('Body mass (g)', 2700.0, 6300.0, 4207.0)
-  gender = st.selectbox('Gender', ('male', 'female'))
+  = st.selectbox('Sex', ('male', 'female'))
   
   # Create a DataFrame for the input features
-  data = {'island': island,
-          'bill_length_mm': bill_length_mm,
-          'bill_depth_mm': bill_depth_mm,
-          'flipper_length_mm': flipper_length_mm,
+  data = {'country': country,
+          'height_cm': height_cm,
+          'weight_kg': weight_kg,
+          'tail_length_cm': tail_length_cm,
           'body_mass_g': body_mass_g,
-          'sex': gender}
+          'sex':sex  }
   input_df = pd.DataFrame(data, index=[0])
-  input_penguins = pd.concat([input_df, X_raw], axis=0)
+  input_dogs = pd.concat([input_df, X_raw], axis=0)
 
 with st.expander('Input features'):
-  st.write('**Input penguin**')
+  st.write('**Input dogs**')
   input_df
-  st.write('**Combined penguins data**')
-  input_penguins
+  st.write('**Combined dogs data**')
+  input_dogs
 
 
 # Data preparation
 # Encode X
-encode = ['island', 'sex']
-df_penguins = pd.get_dummies(input_penguins, prefix=encode)
+encode = ['country', 'sex']
+df_dogs = pd.get_dummies(input_dogs, prefix=encode)
 
-X = df_penguins[1:]
-input_row = df_penguins[:1]
+X = df_dogs[1:]
+input_row = df_dogs[:1]
 
 # Encode y
-target_mapper = {'Adelie': 0,
-                 'Chinstrap': 1,
-                 'Gentoo': 2}
+target_mapper = {'Labrador': 0,
+                 'Golden Retriever': 1,
+                 'Bulldog': 2,
+                 'German Shepherd':3
+                }
 def target_encode(val):
   return target_mapper[val]
 
 y = y_raw.apply(target_encode)
 
 with st.expander('Data preparation'):
-  st.write('**Encoded X (input penguin)**')
+  st.write('**Encoded X (input dogs)**')
   input_row
   st.write('**Encoded y**')
   y
@@ -84,31 +86,39 @@ prediction = clf.predict(input_row)
 prediction_proba = clf.predict_proba(input_row)
 
 df_prediction_proba = pd.DataFrame(prediction_proba)
-df_prediction_proba.columns = ['Adelie', 'Chinstrap', 'Gentoo']
-df_prediction_proba.rename(columns={0: 'Adelie',
-                                 1: 'Chinstrap',
-                                 2: 'Gentoo'})
+df_prediction_proba.columns = ['Labrador', 'Golden Retriever', 'Bulldog','German Shepherd']
+df_prediction_proba.rename(columns={0: 'Labrador',
+                                 1: 'Golden Retriever',
+                                 2: 'Bulldog',
+                                 3: 'German Shepherd'})
 
 # Display predicted species
-st.subheader('Predicted Species')
+st.subheader('Predicted breed')
 st.dataframe(df_prediction_proba,
              column_config={
-               'Adelie': st.column_config.ProgressColumn(
-                 'Adelie',
+               'Labrador': st.column_config.ProgressColumn(
+                 'Labrador',
                  format='%f',
                  width='medium',
                  min_value=0,
                  max_value=1
                ),
-               'Chinstrap': st.column_config.ProgressColumn(
-                 'Chinstrap',
+               'Golden Retriever': st.column_config.ProgressColumn(
+                 'Golden Retriever',
                  format='%f',
                  width='medium',
                  min_value=0,
                  max_value=1
                ),
-               'Gentoo': st.column_config.ProgressColumn(
-                 'Gentoo',
+               'Bulldog': st.column_config.ProgressColumn(
+                 'Bulldog',
+                 format='%f',
+                 width='medium',
+                 min_value=0,
+                 max_value=1
+               ),
+                'German Shepherd': st.column_config.ProgressColumn(
+                 'German Shepherd',
                  format='%f',
                  width='medium',
                  min_value=0,
@@ -117,5 +127,5 @@ st.dataframe(df_prediction_proba,
              }, hide_index=True)
 
 
-penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
-st.success(str(penguins_species[prediction][0]))
+dogs_breed = np.array(['Labrador', 'Golden Retriever', 'Bulldog','German Shepherd'])
+st.success(str(dogs_breed[prediction][0]))
