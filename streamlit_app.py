@@ -1,66 +1,121 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
 
-st.title("📄 Resume Screening Based on Job Description")
+st.title('🤖 Machine Learning App')
 
-# Sample Data
-st.info("This app screens resumes based on job descriptions")
+st.info('This is app builds a machine learning model!')
 
-# Load resumes dataset (This is an example. You'll need to preprocess your own resume data)
-df = pd.DataFrame({
-    'Resume': [
-        "I am a software engineer with 5 years of experience in Python and Machine Learning.",
-        "Experienced data analyst with a background in SQL, Excel, and Power BI.",
-        "I have strong experience in web development using JavaScript, React, and Node.js.",
-        "Marketing professional skilled in digital campaigns, SEO, and content creation."
-    ],
-    'Job Fit': [1, 0, 1, 0]  # 1: Good fit, 0: Not a good fit
-})
+with st.expander('Data'):
+  st.write('**Raw data**')
+  df = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/master/penguins_cleaned.csv')
+  df
 
-st.write("**Sample Resumes**")
-st.dataframe(df)
+  st.write('**X**')
+  X_raw = df.drop('species', axis=1)
+  X_raw
 
-# Input job description from the user
-job_description = st.text_area("Enter the Job Description")
+  st.write('**y**')
+  y_raw = df.species
+  y_raw
 
-# Feature Engineering: Vectorize resumes and job descriptions using TF-IDF
-vectorizer = TfidfVectorizer(stop_words='english', max_features=500)
-X = vectorizer.fit_transform(df['Resume']).toarray()
-y = df['Job Fit']
+with st.expander('Data visualization'):
+  st.scatter_chart(data=df, x='bill_length_mm', y='body_mass_g', color='species')
 
-# Split data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Input features
+with st.sidebar:
+  st.header('Input features')
+  island = st.selectbox('Island', ('Biscoe', 'Dream', 'Torgersen'))
+  bill_length_mm = st.slider('Bill length (mm)', 32.1, 59.6, 43.9)
+  bill_depth_mm = st.slider('Bill depth (mm)', 13.1, 21.5, 17.2)
+  flipper_length_mm = st.slider('Flipper length (mm)', 172.0, 231.0, 201.0)
+  body_mass_g = st.slider('Body mass (g)', 2700.0, 6300.0, 4207.0)
+  gender = st.selectbox('Gender', ('male', 'female'))
+  
+  # Create a DataFrame for the input features
+  data = {'island': island,
+          'bill_length_mm': bill_length_mm,
+          'bill_depth_mm': bill_depth_mm,
+          'flipper_length_mm': flipper_length_mm,
+          'body_mass_g': body_mass_g,
+          'sex': gender}
+  input_df = pd.DataFrame(data, index=[0])
+  input_penguins = pd.concat([input_df, X_raw], axis=0)
 
-# Train a model
+with st.expander('Input features'):
+  st.write('**Input penguin**')
+  input_df
+  st.write('**Combined penguins data**')
+  input_penguins
+
+
+# Data preparation
+# Encode X
+encode = ['island', 'sex']
+df_penguins = pd.get_dummies(input_penguins, prefix=encode)
+
+X = df_penguins[1:]
+input_row = df_penguins[:1]
+
+# Encode y
+target_mapper = {'Adelie': 0,
+                 'Chinstrap': 1,
+                 'Gentoo': 2}
+def target_encode(val):
+  return target_mapper[val]
+
+y = y_raw.apply(target_encode)
+
+with st.expander('Data preparation'):
+  st.write('**Encoded X (input penguin)**')
+  input_row
+  st.write('**Encoded y**')
+  y
+
+
+# Model training and inference
+## Train the ML model
 clf = RandomForestClassifier()
-clf.fit(X_train, y_train)
+clf.fit(X, y)
 
-# Evaluate the model
-y_pred = clf.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-st.write(f"Model Accuracy: {accuracy * 100:.2f}%")
+## Apply model to make predictions
+prediction = clf.predict(input_row)
+prediction_proba = clf.predict_proba(input_row)
 
-# Classification report
-st.write("**Classification Report**")
-st.text(classification_report(y_test, y_pred))
+df_prediction_proba = pd.DataFrame(prediction_proba)
+df_prediction_proba.columns = ['Adelie', 'Chinstrap', 'Gentoo']
+df_prediction_proba.rename(columns={0: 'Adelie',
+                                 1: 'Chinstrap',
+                                 2: 'Gentoo'})
 
-# Vectorize the input job description and make a prediction
-if job_description:
-    job_desc_vectorized = vectorizer.transform([job_description]).toarray()
-    prediction = clf.predict(job_desc_vectorized)
-    prediction_proba = clf.predict_proba(job_desc_vectorized)
+# Display predicted species
+st.subheader('Predicted Species')
+st.dataframe(df_prediction_proba,
+             column_config={
+               'Adelie': st.column_config.ProgressColumn(
+                 'Adelie',
+                 format='%f',
+                 width='medium',
+                 min_value=0,
+                 max_value=1
+               ),
+               'Chinstrap': st.column_config.ProgressColumn(
+                 'Chinstrap',
+                 format='%f',
+                 width='medium',
+                 min_value=0,
+                 max_value=1
+               ),
+               'Gentoo': st.column_config.ProgressColumn(
+                 'Gentoo',
+                 format='%f',
+                 width='medium',
+                 min_value=0,
+                 max_value=1
+               ),
+             }, hide_index=True)
 
-    st.subheader("Prediction:")
-    if prediction == 1:
-        st.success("This resume is a good fit for the job!")
-    else:
-        st.error("This resume may not be a good fit for the job.")
 
-    st.subheader("Prediction Probabilities:")
-    st.write(f"Probability of Good Fit: {prediction_proba[0][1]:.2f}")
-    st.write(f"Probability of Not a Good Fit: {prediction_proba[0][0]:.2f}")
+penguins_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
+st.success(str(penguins_species[prediction][0]))
