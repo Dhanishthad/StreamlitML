@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
@@ -81,7 +82,43 @@ clf.fit(df_penguins,y)
 prediction=clf.predict(input_row)
 prediction_probab= clf.predict_proba(input_row)
 
-prediction_probab
+df_prediction_proba=pd.DataFrame(prediction_proba)
+df_prediction_proba.columns=['Adelie','Chinstrap','Gentoo']
+df_prediction_proba.rename(columns={0: 'Adelie',
+                                 1: 'Chinstrap',
+                                 2: 'Gentoo' })
+
+#display predicted species
+st.subheader('Predicted Species')
+st.dataframe(df_prediction_proba,
+            column_config={
+              'Adelie':st.column_config.ProgressColumn(
+                'Adelie',
+                format='%f',
+                width='medium',
+                min_value=0,
+                max_val=1
+              ),
+              'Chinstrap':st.column_config.ProgressColumn(
+                'Chinstrap',
+                format='%f',
+                width='medium',
+                min_value=0,
+                max_val=1
+              ),
+              'Gentoo':st.column_config.ProgressColumn(
+                'Gentoo',
+                format='%f',
+                width='medium',
+                min_value=0,
+                max_val=1
+              ),
+            },hide_index=True)
+
+
+
+penguins_species = np.array(['Adelie','Chinstrap','Gentoo'])
+st.success(str(penguin_species[prediction][0]))
 
 
 
