@@ -26,10 +26,10 @@ with st.expander('Data visualization'):
 with st.sidebar:
     st.header('Input features')
     country = st.selectbox('Country', ('UK', 'Canada', 'Germany'))
-    height_cm = st.slider('Height (cm)', 32.1, 59.6, 43.9)
-    weight_kg = st.slider('Weight (kg)', 13.1, 21.5, 17.2)
-    tail_length_cm = st.slider('Tail length (cm)', 172.0, 231.0, 201.0)
-    body_mass_g = st.slider('Body mass (g)', 2700.0, 6300.0, 4207.0)
+    height_cm = st.slider('Height (cm)', 30.7, 61.8, 43.9)
+    weight_kg = st.slider('Weight (kg)', 11.5, 31.2, 17.2)
+    tail_length_cm = st.slider('Tail length (cm)', 10.0, 38.9, 20.0)
+    body_mass_g = st.slider('Body mass (g)', 32000.0, 52500.0, 42000.0)
     sex = st.selectbox('Sex', ('male', 'female'))
     
     # Create a DataFrame for the input features
